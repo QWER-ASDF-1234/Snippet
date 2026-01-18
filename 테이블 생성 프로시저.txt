@@ -1,0 +1,134 @@
+CREATE DEFINER=`snippet-dev`@`%` PROCEDURE `snippet`.`sp_init_auth_table`()
+begin
+	-- =========================================
+-- Auth Schema (Google OAuth2 + Local Link)
+-- MariaDB / No Foreign Keys
+-- =========================================
+
+SET NAMES utf8mb4;
+
+-- -------------------------
+-- 1) users : 내부 서비스 사용자
+-- -------------------------
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+  user_id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  email          VARCHAR(255) NOT NULL,
+  display_name   VARCHAR(80)  NOT NULL,
+
+  status         ENUM('ACTIVE', 'SUSPENDED', 'DELETED')
+                 NOT NULL DEFAULT 'ACTIVE',
+
+  role           ENUM('USER', 'ADMIN')
+                 NOT NULL DEFAULT 'USER',
+
+  created_at     DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at     DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                   ON UPDATE CURRENT_TIMESTAMP(3),
+
+  PRIMARY KEY (user_id),
+  UNIQUE KEY uq_users_email (email)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -------------------------
+-- 2) oauth_accounts : OAuth 계정 매핑 (Google)
+-- provider_subject = OIDC sub
+-- -------------------------
+DROP TABLE IF EXISTS oauth_accounts;
+
+CREATE TABLE oauth_accounts (
+  oauth_account_id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  user_id            BIGINT UNSIGNED NOT NULL,  -- 논리 연결 (FK 없음)
+
+  provider           VARCHAR(30) NOT NULL,      -- 'google'
+  provider_subject   VARCHAR(120) NOT NULL,     -- OIDC sub (고유)
+
+  email              VARCHAR(255) NULL,
+  email_verified     TINYINT(1) NOT NULL DEFAULT 0,
+
+  last_login_at      DATETIME(3) NULL,
+
+  created_at         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                       ON UPDATE CURRENT_TIMESTAMP(3),
+
+  PRIMARY KEY (oauth_account_id),
+
+  UNIQUE KEY uq_provider_subject (provider, provider_subject),
+  KEY idx_oauth_user (user_id),
+  KEY idx_oauth_email (email)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -------------------------
+-- 3) user_auth_local : 로컬 비밀번호 로그인(연결용)
+-- 유저 1명당 로컬 로그인 1개 (PK = user_id)
+-- -------------------------
+DROP TABLE IF EXISTS user_auth_local;
+
+CREATE TABLE user_auth_local (
+  user_id              BIGINT UNSIGNED NOT NULL, -- 논리 연결 (FK 없음)
+
+  password_hash        VARCHAR(255) NOT NULL,
+
+  password_updated_at  DATETIME(3) NULL,
+
+  failed_login_count   INT NOT NULL DEFAULT 0,
+  locked_until         DATETIME(3) NULL,
+  last_login_at        DATETIME(3) NULL,
+
+  created_at           DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at           DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                         ON UPDATE CURRENT_TIMESTAMP(3),
+
+  PRIMARY KEY (user_id),
+  KEY idx_local_locked_until (locked_until)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -------------------------
+-- 4) refresh_tokens : Refresh Token 저장/회전/로그아웃
+-- 원문 저장 금지 → SHA-256 해시 저장 권장
+-- -------------------------
+DROP TABLE IF EXISTS refresh_tokens;
+
+CREATE TABLE refresh_tokens (
+  token_id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  user_id             BIGINT UNSIGNED NOT NULL,  -- 논리 연결 (FK 없음)
+
+  refresh_token_hash  CHAR(64) NOT NULL,         -- SHA-256 hex
+  expires_at          DATETIME(3) NOT NULL,
+
+  revoked             TINYINT(1) NOT NULL DEFAULT 0,
+
+  user_agent          VARCHAR(255) NULL,
+  ip_address          VARCHAR(45) NULL,
+
+  created_at          DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+  PRIMARY KEY (token_id),
+
+  UNIQUE KEY uq_refresh_hash (refresh_token_hash),
+  KEY idx_refresh_user (user_id),
+  KEY idx_refresh_expires (expires_at),
+  KEY idx_refresh_revoked (revoked)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+END

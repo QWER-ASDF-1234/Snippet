@@ -1,0 +1,120 @@
+com.develop.snippet
+ ├─ SnippetApplication.java
+ │
+ ├─ global
+ │   ├─ config
+ │   │   ├─ JpaConfig.java
+ │   │   ├─ WebConfig.java
+ │   │   └─ SecurityConfig.java               // oauth2Login + jwt filter chain
+ │   │
+ │   ├─ security
+ │   │   ├─ jwt
+ │   │   │   ├─ JwtProvider.java
+ │   │   │   └─ JwtAuthenticationFilter.java
+ │   │   │
+ │   │   ├─ handler
+ │   │   │   ├─ JwtAccessDeniedHandler.java
+ │   │   │   └─ JwtAuthenticationEntryPoint.java
+ │   │   │
+ │   │   ├─ principal
+ │   │   │   └─ UserPrincipal.java            // (선택) JWT 인증 시 principal 표준화
+ │   │   │
+ │   │   ├─ service
+ │   │   │   └─ CustomUserDetailsService.java // (선택) form-login/관리자용 등 남겨도 됨
+ │   │   │
+ │   │   └─ oauth
+ │   │       ├─ CustomOAuth2UserService.java  // OAuth2User 로드 + 사용자 매핑/저장
+ │   │       ├─ OAuth2SuccessHandler.java     // 성공 시 JWT 발급 + redirect/cookie
+ │   │       ├─ OAuthUserInfo.java            // provider별 attribute 매핑
+ │   │       └─ OAuthPrincipal.java           // OAuth 인증 principal
+ │   │
+ │   ├─ error
+ │   │   ├─ ApiErrorCode.java
+ │   │   ├─ ApiException.java
+ │   │   ├─ GlobalExceptionHandler.java
+ │   │   └─ ErrorResponse.java
+ │   │
+ │   ├─ response
+ │   │   └─ ApiResponse.java
+ │   │
+ │   └─ util
+ │       ├─ PageResponse.java
+ │       └─ TimeProvider.java
+ │
+ ├─ domain
+ │   ├─ auth
+ │   │   ├─ controller
+ │   │   │   └─ AuthController.java           // (선택) refresh/logout 같은 endpoint
+ │   │   ├─ service
+ │   │   │   └─ AuthService.java              // refresh/logout + (필요 시) 토큰 재발급
+ │   │   ├─ dto
+ │   │   │   ├─ request
+ │   │   │   │   ├─ RefreshRequest.java       // (추가) refresh token 재발급용
+ │   │   │   │   └─ LogoutRequest.java        // (추가) 로그아웃 정책 있으면
+ │   │   │   └─ response
+ │   │   │       └─ TokenResponse.java
+ │   │   └─ support
+ │   │       └─ PasswordEncoderSupport.java   // (OAuth만 쓰면 optional)
+ │   │
+ │   ├─ user
+ │   │   ├─ controller
+ │   │   │   └─ UserController.java
+ │   │   ├─ service
+ │   │   │   └─ UserService.java
+ │   │   ├─ repository
+ │   │   │   └─ UserRepository.java
+ │   │   ├─ domain
+ │   │   │   ├─ User.java
+ │   │   │   ├─ UserRole.java
+ │   │   │   └─ AuthProvider.java             // (추가) GOOGLE/GITHUB/KAKAO...
+ │   │   └─ dto
+ │   │       └─ response
+ │   │           └─ UserResponse.java
+ │   │
+ │   ├─ snippet
+ │   │   ├─ controller
+ │   │   │   └─ SnippetController.java
+ │   │   ├─ service
+ │   │   │   └─ SnippetService.java
+ │   │   ├─ repository
+ │   │   │   ├─ SnippetRepository.java
+ │   │   │   └─ SnippetQueryRepository.java
+ │   │   ├─ domain
+ │   │   │   ├─ Snippet.java
+ │   │   │   ├─ SnippetLanguage.java
+ │   │   │   └─ SnippetVisibility.java
+ │   │   └─ dto
+ │   │       ├─ request
+ │   │       │   ├─ SnippetCreateRequest.java
+ │   │       │   ├─ SnippetUpdateRequest.java
+ │   │       │   └─ SnippetSearchRequest.java
+ │   │       └─ response
+ │   │           ├─ SnippetResponse.java
+ │   │           └─ SnippetListItemResponse.java
+ │   │
+ │   ├─ tag
+ │   │   ├─ controller
+ │   │   │   └─ TagController.java
+ │   │   ├─ service
+ │   │   │   └─ TagService.java
+ │   │   ├─ repository
+ │   │   │   └─ TagRepository.java
+ │   │   ├─ domain
+ │   │   │   └─ Tag.java
+ │   │   └─ dto
+ │   │       ├─ request
+ │   │       │   └─ TagCreateRequest.java
+ │   │       └─ response
+ │   │           └─ TagResponse.java
+ │   │
+ │   └─ snippet_tag
+ │       ├─ repository
+ │       │   └─ SnippetTagRepository.java
+ │       └─ domain
+ │           └─ SnippetTag.java
+ │
+ └─ infra
+     ├─ persistence
+     │   └─ QuerydslSupport.java
+     └─ storage
+         └─ LocalFileStorage.java

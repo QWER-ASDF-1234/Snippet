@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: snippet
+
+  profiles:
+    active: dev
+
+  jackson:
+    time-zone: Asia/Seoul
+
+server:
+  port: 8080
+
+# OAuth2 + JWT 설정
+app:
+  security:
+    oauth2:
+      success-redirect-url: "http://localhost:8080/test/oauth/success"
+      failure-redirect-url: "http://localhost:8080/test/oauth/failure"
+    jwt:
+      issuer: "snippet"
+      secret: ${JWT_SECRET}
+      access-token-minutes: 15
+      refresh-token-days: 14
+      refresh-cookie-name: "REFRESH_TOKEN"
+      refresh-cookie-path: "/"
+      refresh-cookie-secure: false
+      refresh-cookie-same-site: "Lax"
