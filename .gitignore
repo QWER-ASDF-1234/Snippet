@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+.env
+.env.local
+.env.*.local
+
+# Application properties with sensitive data
+application.*.yml
