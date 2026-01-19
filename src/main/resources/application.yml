@@ -15,8 +15,9 @@ server:
 app:
   security:
     oauth2:
-      success-redirect-url: "http://localhost:8080/test/oauth/success"
-      failure-redirect-url: "http://localhost:8080/test/oauth/failure"
+      # 프론트엔드 콜백 URL로 변경
+      success-redirect-url: "http://localhost:5173/auth/callback"
+      failure-redirect-url: "http://localhost:5173/signin?error=oauth"
     jwt:
       issuer: "snippet"
       secret: ${JWT_SECRET}

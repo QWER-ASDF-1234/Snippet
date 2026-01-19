@@ -18,14 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends OidcUserService {  // 변경
+public class CustomOAuth2UserService extends OidcUserService {
 
     private final UserRepository userRepository;
     private final OAuthAccountRepository oAuthAccountRepository;
 
     @Override
     @Transactional
-    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {  // 변경
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         // 1. OAuth2 제공자로부터 사용자 정보 가져오기
         OidcUser oidcUser = super.loadUser(userRequest);
 
@@ -59,8 +59,8 @@ public class CustomOAuth2UserService extends OidcUserService {  // 변경
                 provider,
                 user.getRole(),
                 oidcUser.getAttributes(),
-                oidcUser.getIdToken(),        // 추가
-                oidcUser.getUserInfo()        // 추가
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo()
         );
     }
 
